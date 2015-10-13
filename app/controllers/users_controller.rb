@@ -10,6 +10,7 @@ class UsersController < ApplicationController
   # GET /users/1
   # GET /users/1.json
   def show
+    @books = @user.books
   end
 
   # GET /users/new
@@ -29,7 +30,8 @@ class UsersController < ApplicationController
     respond_to do |format|
       if @user.save
         # Notify the admin that a new user has been added
-        AdminMailer.new_user(@user).deliver_now
+        SendMailJob.set(wait: 10.seconds).perform_later(@user)
+        #AdminMailer.new_user(@user).deliver_now
         format.html { redirect_to @user, notice: 'User was successfully created.' }
         format.json { render :show, status: :created, location: @user }
       else
@@ -63,30 +65,7 @@ class UsersController < ApplicationController
     end
   end
 
-  def create_book
-    @book = Book.new(book_params)
-
-    respond_to do |format|
-      if @book.save
-        format.html { redirect_to @user, notice: 'Book was successfully created.' }
-        format.json { render :show, status: :created, location: @user }
-      else
-        format.html { render :new }
-        format.json { render json: @book.errors, status: :unprocessable_entity }
-      end
-    end
-  end
-
-  def destroy_book
-    @book = Book.find(params[:book_id])
-    @book.destroy
-    respond_to do |format|
-      format.html { redirect_to @user, notice: 'Book was successfully destroyed.' }
-      format.json { head :no_content }
-    end
-  end
-
-  private
+    private
     # Use callbacks to share common setup or constraints between actions.
     def set_user
       @user = User.find(params[:id])
@@ -95,9 +74,5 @@ class UsersController < ApplicationController
     # Never trust parameters from the scary internet, only allow the white list through.
     def user_params
       params.require(:user).permit(:name, :email)
-    end
-
-    def book_params
-      params.require(:book).permit(:title, :user_id)
     end
 end

@@ -28,3 +28,11 @@ Please add your notes below.
 
 Notes
 -----
+Refactoring
+1. Use partials for both book form and book list
+2. Change book routes from nested to resource
+3. generate books controller - take methods out of user controller - separation of concerns etc.
+4. dependent destroy books on user
+5. delayed job for user sign up admin mails - further layer of abstraction - needs smtp config etc
+
+
